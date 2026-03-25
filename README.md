@@ -153,14 +153,14 @@ except:
 Terakhir jika terjadi error, socket akan dihapus dari polling dan ditutup
 
 ## Screenshot Hasil
-### 1. Server thread
+### 1. Threading Module
 <img width="1864" height="474" alt="Screenshot 2026-03-25 144434" src="https://github.com/user-attachments/assets/8394fbb0-8442-4957-922f-f30d8ab99027" />
 
-### 2. Server sync
+### 2. Synchronous Module
 <img width="1864" height="489" alt="Screenshot 2026-03-25 144737" src="https://github.com/user-attachments/assets/6bc39e8f-aef9-462c-b2db-b63de4f713f7" />
 
-### 3. Server select
+### 3. Select Module
 <img width="1919" height="571" alt="Screenshot 2026-03-25 144939" src="https://github.com/user-attachments/assets/e4ade567-539c-40a2-af12-89c41e7e1382" />
 
-### 4. Server poll
+### 4. Poll Module
 <img width="1863" height="500" alt="Screenshot 2026-03-25 145110" src="https://github.com/user-attachments/assets/eae47d7b-da3c-4696-bb64-f9c3594803fd" />
