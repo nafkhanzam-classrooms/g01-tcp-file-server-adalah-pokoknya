@@ -14,9 +14,182 @@ Link ditaruh di bawah ini
 ```
 
 ## Penjelasan Program
+
 ### A. Client.py
+Client adalah program yang digunakan untuk terhubung ke server menggunakan protokol TCP, serta mengirim dan menerima data dari server.
+
+```python
+import socket
+import threading
+import os
+```
+Program diatas digunakan untuk mengimpor library untuk komunikasi jaringan (socket), menjalankan proses secara bersamaan (threading), dan mengelola file (os)
+
+```python
+HOST = '127.0.0.1'
+PORT = 12345
+```
+Digunakan untuk menentukan alamat server dan port tujuan koneksi
+
+```python
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((HOST, PORT))
+```
+Membuat socket TCP dan menghubungkan client ke server
+
+```python
+threading.Thread(target=receive, args=(client,), daemon=True).start()
+```
+Membuat thread tambahan untuk menerima pesan dari server secara terus-menerus tanpa mengganggu input user
+
+```python
+data = sock.recv(1024)
+print(data.decode())
+```
+Digunakan untuk menerima data dari server dan menampilkannya ke terminal
+
+```python
+client.send(msg.encode())
+```
+Digunakan untuk mengirim pesan atau command dari client ke server
+
+Client juga mendukung beberapa command:
+```
+- /list → meminta daftar file dari server
+- /upload → mengirim file ke server
+- /download → mengambil file dari server
+```
+Pada proses upload dan download, client membaca atau menulis file dalam bentuk byte, serta menggunakan penanda "EOF" untuk menandai akhir file
+
 ### B. Server-thread.py
+Server thread adalah server yang menangani banyak client secara bersamaan menggunakan thread, dimana setiap client dijalankan pada thread yang berbeda.
+
+```python
+import socket
+import threading
+import os
+```
+Program diatas digunakan untuk komunikasi jaringan (socket), concurrency menggunakan thread (threading), dan pengelolaan file (os).
+
+```python
+HOST = '0.0.0.0'
+PORT = 12345
+FILES_DIR = "files"
+```
+Digunakan untuk menentukan alamat server, port, dan folder penyimpanan file
+
+```python
+if not os.path.exists(FILES_DIR):
+os.makedirs(FILES_DIR)
+````
+Program memastikan folder files tersedia untuk menyimpan file upload
+
+```python
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen()
+```
+Membuat server TCP, menghubungkan ke alamat dan port, serta mulai mendengarkan koneksi
+
+```python
+conn, addr = server.accept()
+threading.Thread(target=handle_client, args=(conn, addr)).start()
+```
+Jika ada client yang terhubung, server akan membuat thread baru untuk menangani client tersebut
+
+```python
+clients = []
+```
+Digunakan untuk menyimpan semua client yang sedang terhubung
+
+```python
+def broadcast(msg, sender):
+for c in clients:
+if c != sender:
+c.send(msg)
+```
+Fungsi broadcast digunakan untuk mengirim pesan ke semua client kecuali pengirim
+
+```python
+data = conn.recv(1024)
+```
+Server menerima data dari client
+
+```python
+files = os.listdir(FILES_DIR)
+```
+Menampilkan daftar file yang tersedia di server saat command `/list` dijalankan
+
+```python
+with open(filepath, "wb") as f:
+...
+```
+Server menerima file dari client saat upload dan menyimpannya ke folder files hingga menemukan penanda "EOF".
+
+```python
+with open(filepath, "rb") as f:
+...
+```
+Server membaca file dan mengirimkannya ke client saat download. Server juga mendukung broadcast, dimana pesan biasa akan dikirim ke semua client lain. Keunggulan server ini dapat menangani banyak client secara bersamaan, namun penggunaan thread dapat lebih berat jika jumlah client sangat banyak.
+
 ### C. Server-sync.py
+Server sync adalah server yang berjalan secara synchronous (blocking), dimana server hanya dapat melayani satu client dalam satu waktu.
+
+```python
+import socket
+import os
+```
+Program diatas digunakan untuk komunikasi jaringan (socket) dan pengelolaan file (os).
+
+```python
+HOST = '0.0.0.0'
+PORT = 12345
+FILES_DIR = "files"
+```
+Digunakan untuk menentukan alamat server, port, dan folder penyimpanan file.
+
+```python
+if not os.path.exists(FILES_DIR):
+os.makedirs(FILES_DIR)
+```
+Program memastikan folder files tersedia untuk menyimpan file upload.
+
+```python
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen()
+```
+Membuat server TCP dan mulai menerima koneksi.
+
+```python
+conn, addr = server.accept()
+```
+Server menerima koneksi dari satu client dan langsung menanganinya.
+
+```python
+data = conn.recv(1024)
+```
+Server membaca data dari client secara terus-menerus.
+
+```python
+files = os.listdir(FILES_DIR)
+```
+Menampilkan daftar file di server saat command `/list` dijalankan.
+
+```python
+with open(filepath, "wb") as f:
+...
+```
+Digunakan untuk menerima file dari client saat upload.
+
+```python
+with open(filepath, "rb") as f:
+...
+```
+Digunakan untuk mengirim file ke client saat download.
+
+Server ini tidak menggunakan thread sehingga hanya dapat menangani satu client dalam satu waktu. Kelebihannya sederhana dan mudah dipahami. Namun, kekurangannya yaitu tidak dapat menangani banyak client secara bersamaan dan kurang efisien jika client banyak.
+
 ### D. Server-select.py
 Server select adalah server yang menangani banyak client dalam satu thread dengan memantau banyak socket menggunakan fungsi select, sehingga lebih efisien tetapi dapat mengalami blocking saat proses tertentu
 
