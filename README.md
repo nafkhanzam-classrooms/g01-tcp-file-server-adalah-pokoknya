@@ -18,6 +18,8 @@ Link ditaruh di bawah ini
 ### B. Server-thread.py
 ### C. Server-sync.py
 ### D. Server-select.py
+Server select adalah server yang menangani banyak client dalam satu thread dengan memantau banyak socket menggunakan fungsi select, sehingga lebih efisien tetapi dapat mengalami blocking saat proses tertentu
+
 ```
 import socket
 import select
