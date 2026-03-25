@@ -2,10 +2,10 @@
 # Network Programming - Assignment G01
 
 ## Anggota Kelompok
-| Nama           | NRP        | Kelas     |
-| ---            | ---        | ----------|
-|                |            |           |
-|                |            |           |
+| Nama                     | NRP        | Kelas |
+|--------------------------|------------|-------|
+| Umi Lailatul Khotimah    | 5025241062 |   C   |
+| Nashwa Aulia Putri D     | 50252410XX |   C   |
 
 ## Link Youtube (Unlisted)
 Link ditaruh di bawah ini
