@@ -104,9 +104,9 @@ Digunakan untuk menyimpan semua client yang sedang terhubung
 
 ```python
 def broadcast(msg, sender):
-for c in clients:
-if c != sender:
-c.send(msg)
+    for c in clients:
+        if c != sender:
+            c.send(msg)
 ```
 Fungsi broadcast digunakan untuk mengirim pesan ke semua client kecuali pengirim
 
