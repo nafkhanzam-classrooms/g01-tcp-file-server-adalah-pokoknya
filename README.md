@@ -14,26 +14,71 @@ Link ditaruh di bawah ini
 ```
 
 ## Penjelasan Program
-### Client.py
-### Server-thread.py
-### Server-sync.py
-### Server-select.py
+### A. Client.py
+### B. Server-thread.py
+### C. Server-sync.py
+### D. Server-select.py
 ```
 import socket
 import select
 import os
 ```
 Program diatas untuk mengimpor library yang digunakan untuk komunikasi jaringan(socket), menangani banyak koneksi sekaligus(select), dan mengelola file(os)
-
 ```
 HOST = '0.0.0.0'
 PORT = 12345
 FILES_DIR = "files"
 ```
 Digunakan untuk menentukan alamat server, port komunikasi, dan folder penyimpanan file
+```
+if not os.path.exists(FILES_DIR):
+    os.makedirs(FILES_DIR)
+```
+Lalu program memastikan folder files tersedia untuk menyimpan file upload
+```
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen()
+server.setblocking(False)
+```
+Setelah itu membuat server TCP, menghubungkan ke host dan port, lalu mengatur socket menjadi non-blocking agar tidak berhenti saat menunggu data
+```
+sockets = [server]
+clients = []
+```
+Sockets digunakan untuk dipantau oleh select, sedangkan clients menyimpan semua client yang terhubung
+```
+def broadcast(msg, sender):
+    for c in clients:
+        if c != sender:
+            c.send(msg)
+```
+Ada program broadcast yang fungsinya sendiri mengirim pesan ke semua client kecuali pengirim
+```
+while True:
+    read_sockets, _, _ = select.select(sockets, [], [])
+```
+Server terus berjalan dan memeriksa socket yang aktif menggunakan select
+```
+if sock == server:
+    conn, addr = server.accept()
+    conn.setblocking(False)
+```
+Jika ada client baru, server menerima koneksi dan menambahkannya ke daftar
+```
+data = sock.recv(1024)
+files = os.listdir(FILES_DIR)
+sock.send(b"READY")
+broadcast(data, sock)
+```
+Server membaca data dari client, jika kosong maka client dianggap disconnect. Menampilkan daftar file yang ada di server dengan perintah list. Server menerima file dari client dan menyimpannya hingga menerima penanda EOF serta mengirim file ke client jika tersedia, lalu diakhiri dengan EOF. Lalu broadcast yang artinya bahwa pesan biasa akan dikirim ke semua client lain
+```
+except:
+    sock.close()
+```
+Terakhir jika terjadi error, koneksi client akan ditutup.
 
-
-### Server-poll.py
+### E. Server-poll.py
 
 ## Screenshot Hasil
 ### 1. Server thread
