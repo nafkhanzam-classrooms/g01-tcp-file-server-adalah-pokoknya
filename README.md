@@ -18,6 +18,21 @@ Link ditaruh di bawah ini
 ### Server-thread.py
 ### Server-sync.py
 ### Server-select.py
+```
+import socket
+import select
+import os
+```
+Program diatas untuk mengimpor library yang digunakan untuk komunikasi jaringan(socket), menangani banyak koneksi sekaligus(select), dan mengelola file(os)
+
+```
+HOST = '0.0.0.0'
+PORT = 12345
+FILES_DIR = "files"
+```
+Digunakan untuk menentukan alamat server, port komunikasi, dan folder penyimpanan file
+
+
 ### Server-poll.py
 
 ## Screenshot Hasil
