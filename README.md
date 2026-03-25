@@ -81,6 +81,76 @@ except:
 Terakhir jika terjadi error, koneksi client akan ditutup.
 
 ### E. Server-poll.py
+Server poll adalah server yang menangani banyak client dalam satu thread menggunakan mekanisme poll yang lebih efisien daripada select, namun masih dapat mengalami blocking saat proses tertentu
+```
+import socket
+import select
+import os
+
+HOST = '0.0.0.0'
+PORT = 12345
+FILES_DIR = "files"
+```
+Program ini mengimpor library untuk jaringan, polling, dan file, serta menentukan alamat server, port, dan folder penyimpanan file
+```
+if not os.path.exists(FILES_DIR):
+    os.makedirs(FILES_DIR)
+```
+Lalu program memastikan folder files tersedia untuk menyimpan file upload
+```
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen()
+server.setblocking(False)
+```
+Server dibuat menggunakan TCP, di-bind ke alamat dan port, lalu dibuat non-blocking agar bisa menangani banyak client
+```
+poller = select.poll()
+poller.register(server, select.POLLIN)
+
+fd_map = {server.fileno(): server}
+clients = []
+```
+Program ini adalah inti dari server poll, poller digunakan untuk memonitor banyak socket. Server didaftarkan agar bisa dideteksi saat ada koneksi masuk. fd_map digunakan untuk menghubungkan file descriptor ke socket, dan clients menyimpan client aktif
+```
+def broadcast(msg, sender):
+    for c in clients:
+        if c != sender:
+            c.send(msg)
+```
+Ada program broadcast yang fungsinya sendiri mengirim pesan ke semua client kecuali pengirim
+```
+while True:
+    events = poller.poll()
+```
+Server berjalan terus dan menggunakan poll() untuk mendeteksi socket yang sedang aktif
+```
+if sock == server:
+    conn, addr = server.accept()
+    conn.setblocking(False)
+    poller.register(conn, select.POLLIN)
+    fd_map[conn.fileno()] = conn
+    clients.append(conn)
+```
+Jika ada client baru, server menerima koneksi, lalu menambahkannya ke sistem polling dan daftar client
+```
+data = sock.recv(1024)
+if not data:
+    poller.unregister(fd)
+    clients.remove(sock)
+    sock.close()
+
+files = os.listdir(FILES_DIR)
+sock.send(b"READY")
+broadcast(data, sock)
+```
+Server membaca data dari client, jika kosong maka client dianggap disconnect. Menampilkan daftar file yang ada di server dengan perintah list. Server menerima file dari client dan menyimpannya hingga menerima penanda EOF serta mengirim file ke client jika tersedia, lalu diakhiri dengan EOF. Lalu broadcast yang artinya bahwa pesan biasa akan dikirim ke semua client lain
+```
+except:
+    poller.unregister(fd)
+    sock.close()
+```
+Terakhir jika terjadi error, socket akan dihapus dari polling dan ditutup
 
 ## Screenshot Hasil
 ### 1. Server thread
